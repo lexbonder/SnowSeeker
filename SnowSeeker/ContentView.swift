@@ -7,36 +7,57 @@
 
 import SwiftUI
 
-struct UserView: View {
-    var body: some View {
-        Group {
-            Text("Name: Alex")
-            Text("Country: USA")
-            Text("Pets: Crystal")
-        }
-        .font(.title)
-    }
-}
+//extension View {
+//    @ViewBuilder func phoneOnlyNavigationView() -> some View {
+//        if UIDevice.current.userInterfaceIdiom == .phone {
+//            self.navigationViewStyle(.stack)
+//        } else {
+//            self
+//        }
+//    }
+//}
 
 struct ContentView: View {
+    let resorts: [Resort] = Bundle.main.decode("resorts.json")
     @State private var searchText = ""
-    let allNames = ["Subh", "Vina", "Melvin", "Stefanie"]
-    
+
     var body: some View {
         NavigationView {
-            List(filteredNames, id: \.self) { name in
-                Text(name)
+            List(filteredResorts) { resort in
+                NavigationLink {
+                    ResortView(resort: resort)
+                } label: {
+                    Image(resort.country)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 40, height: 25)
+                        .clipShape(RoundedRectangle(cornerRadius: 5))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 5)
+                                .stroke(.black, lineWidth: 1)
+                        )
+                    
+                    VStack(alignment: .leading) {
+                        Text(resort.name)
+                            .font(.headline)
+                        Text("\(resort.runs) runs")
+                            .foregroundStyle(.secondary)
+                    }
+                }
             }
-            .searchable(text: $searchText, prompt: "Look for something")
-            .navigationTitle("Searching")
+            .navigationTitle("Resorts")
+            .searchable(text: $searchText, prompt: "Search for a resort")
+            
+            WelcomeView()
         }
+//        .phoneOnlyNavigationView()
     }
     
-    var filteredNames: [String] {
+    var filteredResorts: [Resort] {
         if searchText.isEmpty {
-            return allNames
+            return resorts
         } else {
-            return allNames.filter { $0.localizedCaseInsensitiveContains(searchText) }
+            return resorts.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
         }
     }
 }
