@@ -9,11 +9,17 @@ import Foundation
 
 class Favorites: ObservableObject {
     private var resorts: Set<String>
-    private let saveKey = "Favorites"
+    private let saveKey = "Favorites.txt"
     
     init() {
-        // load saved data
         resorts = []
+        do {
+            let url = getDocumentsDirectory().appendingPathComponent(saveKey)
+            let data = try Data(contentsOf: url)
+            resorts = try JSONDecoder().decode(Set<String>.self, from: data)
+        } catch {
+            print("Failed to load favorites: \(error.localizedDescription)")
+        }
     }
     
     func contains(_ resort: Resort) -> Bool {
@@ -33,6 +39,17 @@ class Favorites: ObservableObject {
     }
     
     func save() {
-        // save code
+        let url = getDocumentsDirectory().appendingPathComponent(saveKey)
+        do {
+            let data = try JSONEncoder().encode(resorts)
+            try data.write(to: url)
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
+    
+    func getDocumentsDirectory() -> URL {
+        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+        return paths[0]
     }
 }
